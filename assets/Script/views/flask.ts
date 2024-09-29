@@ -1,7 +1,7 @@
 import { Component, _decorator,Node, UITransform, Color, Tween, Vec2, tween, v3, v2, Vec3, Widget, Layers } from "cc";
 import { AudioEnum, AudioUtil } from "../utils/audio_util";
-import Water, { WaterInfo } from "./water";
-import { WaterFlow } from "./waterFlow";
+import liquid, { liquidInfo } from "./flask";
+import { LiquidFlow } from "./liquidFlow";
 import { EDITOR } from "cc/env";
 
 const { ccclass, property } = _decorator;
@@ -54,18 +54,18 @@ const SPLIT_COUNT = 4;
 
 @ccclass
 export default class Flask extends Component {
-    @property(Water)
-    private water:Water = null;
+    @property(liquid)
+    private flask:liquid = null;
 
-    private _flow:WaterFlow = null;
-    public getFlow():WaterFlow{
+    private _flow:LiquidFlow = null;
+    public getFlow():LiquidFlow{
         if(this._flow){
             return this._flow;
         }
         let _node = new Node("water_flow");
         _node.layer = Layers.Enum.UI_2D
         _node.addComponent(UITransform)
-        this._flow = _node.addComponent(WaterFlow);
+        this._flow = _node.addComponent(LiquidFlow);
         return this._flow;
     }
 
@@ -111,7 +111,7 @@ export default class Flask extends Component {
             obj.height*=HEIGHT_FACTOR;
         })
         
-        this.water.initInfos(arr);
+        this.flask.initInfos(arr);
     }
 
     private info:FlaskInfo = null;
@@ -128,10 +128,10 @@ export default class Flask extends Component {
         if(EDITOR){
             return;
         }
-        if(this.water.skewAngle==this.node.angle){
+        if(this.flask.skewAngle==this.node.angle){
             return;
         }
-        this.water.skewAngle = this.node.angle;
+        this.flask.skewAngle = this.node.angle;
     }
 
     private setPourOutCallback(pourStart,pourEnd){
@@ -152,7 +152,7 @@ export default class Flask extends Component {
                 pourEnd(this)
             }
         }
-        this.water.setPourOutCallback(_onStart.bind(this),_onFinish.bind(this));
+        this.flask.setPourOutCallback(_onStart.bind(this),_onFinish.bind(this));
     }
 
     private setPourInCallback(onFinish){
@@ -167,7 +167,7 @@ export default class Flask extends Component {
                 AudioUtil.playEffect(AudioEnum.finishOne,0.4)
             }
         }
-        this.water.setPourInCallback(_onFinish.bind(this));
+        this.flask.setPourInCallback(_onFinish.bind(this));
     }
 
     /**是否完成了（同颜色填满整个杯子） */
@@ -203,10 +203,10 @@ export default class Flask extends Component {
     moveToPour(dstPt:Vec3,isRight:boolean,onPourStart:(c:Flask)=>void,onPourEnd:(c:Flask)=>void){
         this.setPourOutCallback(onPourStart,onPourEnd);
 
-        let startAngle = this.water.getPourStartAngle()
-        let endAngle = this.water.getPourEndAngle()
+        let startAngle = this.flask.getPourStartAngle()
+        let endAngle = this.flask.getPourEndAngle()
 
-        this.water.onStartPour();
+        this.flask.onStartPour();
         if(isRight){
             startAngle*=-1;
             endAngle*=-1;
@@ -250,7 +250,7 @@ export default class Flask extends Component {
             }
         }
         let hex = WaterColors[colorId]||"#538849"
-        this.water.addInfo({
+        this.flask.addInfo({
             colorId:colorId,
             height:num/SPLIT_COUNT *HEIGHT_FACTOR,
             color:new Color().fromHEX(hex)
@@ -323,7 +323,7 @@ export default class Flask extends Component {
 
     reset(){
         this.node.angle = 0;
-        this.water.skewAngle = 0
+        this.flask.skewAngle = 0
     }
 
     public setPourAnchor(isRight:boolean){
@@ -356,7 +356,7 @@ export default class Flask extends Component {
         selfPt.y += offsetPt.y;
         this.node.setPosition(selfPt);
 
-        this.water.getComponent(Widget).updateAlignment()
+        this.flask.getComponent(Widget).updateAlignment()
     }
 
     /**获取当前水面的global y坐标 */
@@ -370,8 +370,8 @@ export default class Flask extends Component {
         }
         y*=HEIGHT_FACTOR;
         y-=0.5;
-        let pt = v3(0,this.water.node.getComponent(UITransform).height*y);
-        pt = this.water.node.getComponent(UITransform).convertToWorldSpaceAR(pt)
+        let pt = v3(0,this.flask.node.getComponent(UITransform).height*y);
+        pt = this.flask.node.getComponent(UITransform).convertToWorldSpaceAR(pt)
         return pt.y
     }
 }

@@ -8,7 +8,7 @@ const COOKIE_LEVEL = "level"
 const COOKIE_LAST_CFG = "last_cfg"
 const COOKIE_ACTION_HISTORY = "action_history"
 
-// spacesArr 是一个在 CupMgr 类中定义的对象，用于存储不同数量杯子时，水平布局的间距和缩放比例。具体来说，它是一个键值对对象，其中键是杯子的数量，值是一个数组，包含两个或三个元素：
+// spacesArr 是一个在 flaskMgr 类中定义的对象，用于存储不同数量杯子时，水平布局的间距和缩放比例。具体来说，它是一个键值对对象，其中键是杯子的数量，值是一个数组，包含两个或三个元素：
 
 // 第一个元素是水平间距 spacingX。
 // 第二个元素是垂直缩放比例 scale。
@@ -27,7 +27,7 @@ const spacesArr = {
 
 @ccclass
 @executeInEditMode
-export class CupMgr extends Component{
+export class flaskMgr extends Component{
     @property(JsonAsset)
     private levelCfg:JsonAsset = null;
     @property(Prefab)

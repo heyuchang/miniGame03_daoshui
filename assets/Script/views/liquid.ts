@@ -3,7 +3,7 @@ import { DEV, EDITOR } from "cc/env";
 
 const { ccclass, property, requireComponent, executeInEditMode, disallowMultiple, executionOrder } = _decorator;
 
-export interface WaterInfo{
+export interface liquidInfo{
     colorId:number,
     color:Color,//颜色
     height:number,//默认情况下，占杯子的高度
@@ -24,9 +24,9 @@ enum PourAction{
 @executeInEditMode
 @disallowMultiple
 @executionOrder(-100)
-export default class Water extends Component {
+export default class liquid extends Component {
     private _action:PourAction = PourAction.none;
-    private infos:WaterInfo[] = [];
+    private infos:liquidInfo[] = [];
     /**到这里停止倒水 */
     private stopIdx = -1;
     /**当前是有几层水 */
@@ -72,7 +72,7 @@ export default class Water extends Component {
         this._ratio = this.node.getComponent(UITransform).height/this.node.getComponent(UITransform).width;
     }
 
-    public initInfos(infos:Array<WaterInfo>){
+    public initInfos(infos:Array<liquidInfo>){
         this.infos = infos;
         this.curIdx = this.infos.length-1;
 
@@ -81,7 +81,7 @@ export default class Water extends Component {
     }
 
     private addHeight = 0;
-    public addInfo(info:WaterInfo){
+    public addInfo(info:liquidInfo){
         this.addHeight = info.height;
         info.height = 0;
         this.infos.push(info);

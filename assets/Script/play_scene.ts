@@ -4,15 +4,15 @@ import { Component, Label, _decorator, Sprite, resources, sp,SpriteFrame, Color,
 import { DlgSetting } from "./dialog/dlg_setting";
 import { DlgYouWin } from "./dialog/dlg_youWIn";
 import { AudioEnum, AudioUtil } from "./utils/audio_util";
-import { CupMgr } from "./views/flaskMgr";
+import { flaskMgr } from "./views/flaskMgr";
 
 
 const {ccclass, property} = _decorator;
 
 @ccclass
 export default class PlayScene extends Component {
-    @property(CupMgr)
-    private flaskMgr: CupMgr = null;
+    @property(flaskMgr)
+    private flaskMgr: flaskMgr = null;
     @property(Label)
     private text_level:Label = null;
     @property(Label)

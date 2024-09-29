@@ -5,7 +5,7 @@ const dft_lingWidth = 6;
 /**
  * 倾倒的水流
  */
-export class WaterFlow extends Graphics{
+export class LiquidFlow extends Graphics{
     onLoad(){
         super.onLoad()
         this.lineWidth = dft_lingWidth;
@@ -35,7 +35,7 @@ export class WaterFlow extends Graphics{
         
         this.clear();
         
-        let flow:WaterFlow = this
+        let flow:LiquidFlow = this
         if(isTail){
             Vec3.copy(this.from,to);
         }else{
