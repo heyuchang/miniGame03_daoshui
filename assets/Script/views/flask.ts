@@ -46,14 +46,14 @@ export let WaterColors = [
 const HEIGHT_FACTOR = 0.8;
 
 /**一杯水，分成四组四个颜色，0表示没有水 */
-export interface _CupInfo{
+export interface FlaskInfo{
     colorIds:Array<number>;//长度为4
 }
 
 const SPLIT_COUNT = 4;
 
 @ccclass
-export default class Cup extends Component {
+export default class Flask extends Component {
     @property(Water)
     private water:Water = null;
 
@@ -69,7 +69,7 @@ export default class Cup extends Component {
         return this._flow;
     }
 
-    private onClick:(c:Cup)=>void = null;
+    private onClick:(c:Flask)=>void = null;
 
     onBtn_click(){
         if(this.isPouring()){
@@ -114,8 +114,8 @@ export default class Cup extends Component {
         this.water.initInfos(arr);
     }
 
-    private info:_CupInfo = null;
-    setCupInfo(info:_CupInfo,onClick:(c:Cup)=>void){
+    private info:FlaskInfo = null;
+    setCupInfo(info:FlaskInfo,onClick:(c:Flask)=>void){
         this.info = info;
         this.onClick = onClick;
         
@@ -200,7 +200,7 @@ export default class Cup extends Component {
      * @param onPourStart 水开始从瓶口流出来
      * @param onPourEnd 本次水倒完了
      */
-    moveToPour(dstPt:Vec3,isRight:boolean,onPourStart:(c:Cup)=>void,onPourEnd:(c:Cup)=>void){
+    moveToPour(dstPt:Vec3,isRight:boolean,onPourStart:(c:Flask)=>void,onPourEnd:(c:Flask)=>void){
         this.setPourOutCallback(onPourStart,onPourEnd);
 
         let startAngle = this.water.getPourStartAngle()
@@ -237,7 +237,7 @@ export default class Cup extends Component {
         }
     }
 
-    startAddWater(colorId:number,num:number,onComplete:(cup:Cup,isFInish:boolean)=>void){
+    startAddWater(colorId:number,num:number,onComplete:(flask:Flask,isFInish:boolean)=>void){
         this.setPourInCallback(onComplete);
         let acc = 0;
         for(let i=SPLIT_COUNT-1;i>=0;i--){

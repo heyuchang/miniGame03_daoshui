@@ -1,5 +1,5 @@
 import { Component, JsonAsset, Layout, Prefab, _decorator, instantiate, sys,Node, UITransform, v2, v3, view, Color, tween, log } from "cc";
-import Cup, { _CupInfo } from "./cup";
+import Flask, { FlaskInfo } from "./flask";
 import { DEV, EDITOR } from "cc/env";
 
 const { ccclass, property,executeInEditMode } = _decorator;
@@ -35,7 +35,7 @@ export class CupMgr extends Component{
 
     /**当前等级 */
     private _level = 1;
-    private curCfg:Array<_CupInfo> = [];
+    private curCfg:Array<FlaskInfo> = [];
 
     onLoad(){
         if(EDITOR){
@@ -86,7 +86,7 @@ export class CupMgr extends Component{
         this.nextLevel()
     }
     
-    private _cups:Array<Cup> = [];
+    private _cups:Array<Flask> = [];
     private layout_v:Layout = null;
     private async createCups(){
         if(this.layout_v){
@@ -107,7 +107,7 @@ export class CupMgr extends Component{
 
             let _node = instantiate(this.pfb);
             _node.parent = this.node;
-            let _cup = _node.getComponent(Cup)
+            let _cup = _node.getComponent(Flask)
             _cup.setCupInfo(info,this.onClickCup.bind(this));
             this._cups.push(_cup)
         }
@@ -180,32 +180,32 @@ export class CupMgr extends Component{
         }
         this.layout_v.updateLayout();
         this.layout_v.enabled = false;
-        for(let cup of this._cups){
-            (cup as any).orignPt = cup.node.position.clone();
+        for(let flask of this._cups){
+            (flask as any).orignPt = flask.node.position.clone();
         }
     }
 
-    private selected:Cup = null;
-    private onClickCup(cup:Cup){
+    private selected:Flask = null;
+    private onClickCup(flask:Flask){
         if(this.selected){
-            if(this.selected==cup){
-                this.doSelect(cup,false);
+            if(this.selected==flask){
+                this.doSelect(flask,false);
                 this.selected = null;
-            }else if(this.checkPour(this.selected,cup)){
-                this.startPour(this.selected,cup);
+            }else if(this.checkPour(this.selected,flask)){
+                this.startPour(this.selected,flask);
             }else{
                 this.doSelect(this.selected,false);
                 this.selected = null;
             }
         }else{
-            this.selected = cup;
-            this.doSelect(cup,true);
+            this.selected = flask;
+            this.doSelect(flask,true);
         }
             
     }
 
     /**检查两个杯子是否能倒水 */
-    private checkPour(src:Cup,dst:Cup){
+    private checkPour(src:Flask,dst:Flask){
         let srcTop = src.getTop();
         let dstTop = dst.getTop();
         if(srcTop.topColorId==0){
@@ -218,7 +218,7 @@ export class CupMgr extends Component{
     }
 
     /**开始倒水 */
-    private startPour(src:Cup,dst:Cup){
+    private startPour(src:Flask,dst:Flask){
         dst.node.setSiblingIndex(0)
         dst.node.parent.setSiblingIndex(0)
         src.node.setSiblingIndex(10)
@@ -257,7 +257,7 @@ export class CupMgr extends Component{
             flow.strokeColor = new Color().fromHEX(srcTop.colorHex);
             
             flow.playFlowAni(startPt,endPt,0.2,false,()=>{
-                dst.startAddWater(srcTop.topColorId,srcTop.topColorNum,(cup:Cup,isFinished:boolean)=>{
+                dst.startAddWater(srcTop.topColorId,srcTop.topColorNum,(flask:Flask,isFinished:boolean)=>{
                     this.onPourOneFinished(src,dst,srcTop.topColorId,srcTop.topColorNum);
                 });
             })
@@ -292,16 +292,16 @@ export class CupMgr extends Component{
         src.moveToPour(dstPt,isRight,onPourStart.bind(this),onPourFinish.bind(this));
     }
 
-    private doSelect(cup:Cup,bool:boolean){
-        let pt = (cup as any).orignPt;
-        let y = pt.y+(bool?cup.node.getComponent(UITransform).height*0.2:0);
-        tween(cup.node).stop();
-        tween(cup.node).to(0.2,{position:v3(pt.x,y)}).start();
+    private doSelect(flask:Flask,bool:boolean){
+        let pt = (flask as any).orignPt;
+        let y = pt.y+(bool?flask.node.getComponent(UITransform).height*0.2:0);
+        tween(flask.node).stop();
+        tween(flask.node).to(0.2,{position:v3(pt.x,y)}).start();
     }
 
     private _actions:Array<Action> = [];
     /**一次倒水完成（以加水那个杯子水面升到最高为界限） */
-    private onPourOneFinished(from:Cup,to:Cup,colorId:number,num:number){
+    private onPourOneFinished(from:Flask,to:Flask,colorId:number,num:number){
         let fromCupIdx = this._cups.indexOf(from);
         let toCupIdx = this._cups.indexOf(to);
         if(this._actions.length==5){
@@ -359,8 +359,8 @@ export class CupMgr extends Component{
     }
 
     private checkIsAllFinished(){
-        for(let cup of this._cups){
-            if(!cup.checkIsFinshed()){
+        for(let flask of this._cups){
+            if(!flask.checkIsFinshed()){
                 return false
             }
         }

@@ -4,7 +4,7 @@ import { Component, Label, _decorator, Sprite, resources, sp,SpriteFrame, Color,
 import { DlgSetting } from "./dialog/dlg_setting";
 import { DlgYouWin } from "./dialog/dlg_youWIn";
 import { AudioEnum, AudioUtil } from "./utils/audio_util";
-import { CupMgr } from "./views/cupMgr";
+import { CupMgr } from "./views/flaskMgr";
 
 
 const {ccclass, property} = _decorator;
@@ -12,7 +12,7 @@ const {ccclass, property} = _decorator;
 @ccclass
 export default class PlayScene extends Component {
     @property(CupMgr)
-    private cupMgr: CupMgr = null;
+    private flaskMgr: CupMgr = null;
     @property(Label)
     private text_level:Label = null;
     @property(Label)
@@ -21,13 +21,13 @@ export default class PlayScene extends Component {
     private bg:Sprite = null;
 
     onLoad(){
-        this.cupMgr.node.on("level_finish",this.onFinishOneLevel,this);
-        this.cupMgr.node.on("do_pour",this.onPourAction,this);
+        this.flaskMgr.node.on("level_finish",this.onFinishOneLevel,this);
+        this.flaskMgr.node.on("do_pour",this.onPourAction,this);
     }
 
     onDestroy(){
-        this.cupMgr.node.off("level_finish",this.onFinishOneLevel,this);
-        this.cupMgr.node.off("do_pour",this.onPourAction,this);
+        this.flaskMgr.node.off("level_finish",this.onFinishOneLevel,this);
+        this.flaskMgr.node.off("do_pour",this.onPourAction,this);
     }
 
     start(){
@@ -51,8 +51,8 @@ export default class PlayScene extends Component {
         }
 
 
-        this.text_level.string = `第${this.cupMgr.getLevel()}关`
-        this.text_actionNum.string = this.cupMgr.getActionNum()+'';
+        this.text_level.string = `第${this.flaskMgr.getLevel()}关`
+        this.text_actionNum.string = this.flaskMgr.getActionNum()+'';
         this.text_level.color = new Color(this.random(1,255), this.random(1,255), this.random(1,255), 255);
         this.setBgSpriteFrame();
     }
@@ -74,25 +74,25 @@ export default class PlayScene extends Component {
     onFinishOneLevel(){
         AudioUtil.playEffect(AudioEnum.youWin);
         DlgYouWin.show(()=>{
-            this.cupMgr.nextLevel()
-            this.text_level.string = `第${this.cupMgr.getLevel()}关`
-            this.text_actionNum.string = this.cupMgr.getActionNum()+'';
+            this.flaskMgr.nextLevel()
+            this.text_level.string = `第${this.flaskMgr.getLevel()}关`
+            this.text_actionNum.string = this.flaskMgr.getActionNum()+'';
             this.setBgSpriteFrame();
         })
     }
 
     onPourAction(){
-        this.text_actionNum.string = this.cupMgr.getActionNum()+'';
+        this.text_actionNum.string = this.flaskMgr.getActionNum()+'';
     }
 
     onBtn_restart(){
-        this.cupMgr.nextLevel();
-        this.text_actionNum.string = this.cupMgr.getActionNum()+'';
+        this.flaskMgr.nextLevel();
+        this.text_actionNum.string = this.flaskMgr.getActionNum()+'';
     }
 
     onBtn_recover(){
-        this.cupMgr.undoAction();
-        this.text_actionNum.string = this.cupMgr.getActionNum()+'';
+        this.flaskMgr.undoAction();
+        this.text_actionNum.string = this.flaskMgr.getActionNum()+'';
     }
 
     onBtn_tip(){

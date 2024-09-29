@@ -2122,7 +2122,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "cupMgr",
+    "_name": "flaskMgr",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -2389,7 +2389,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "cupMgr": {
+    "flaskMgr": {
       "__id__": 60
     },
     "text_level": {
