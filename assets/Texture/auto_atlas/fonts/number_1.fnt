@@ -1,0 +1,7 @@
+info size=32 unicode=1 stretchH=100 smooth=1 aa=1 padding=0,0,0,0 spacing=1,1 outline=0 common lineHeight=32 base=23 scaleW=256 scaleH=48 pages=1 packed=0 page id=0 file="number_1.png" chars count=6
+char id=48 x=2 y=2 width=25 height=31 xoffset=0 yoffset=0 xadvance=25 
+char id=49 x=29 y=2 width=18 height=31 xoffset=0 yoffset=0 xadvance=18 
+char id=50 x=49 y=2 width=25 height=31 xoffset=0 yoffset=0 xadvance=25 
+char id=51 x=76 y=2 width=24 height=32 xoffset=0 yoffset=0 xadvance=24 
+char id=52 x=102 y=2 width=23 height=30 xoffset=0 yoffset=0 xadvance=23 
+char id=53 x=127 y=2 width=21 height=30 xoffset=0 yoffset=0 xadvance=21 

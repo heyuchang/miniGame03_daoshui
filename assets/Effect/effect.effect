@@ -1,0 +1,252 @@
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        mainTexture:    { value: white }
+        mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
+        color0:      { value: [1, 1, 1, 1], editor: { type: color } }
+        color1:      { value: [1, 1, 1, 1], editor: { type: color } }
+        color2:      { value: [1, 1, 1, 1], editor: { type: color } }
+        color3:      { value: [1, 1, 1, 1], editor: { type: color } }
+        color4:      { value: [1, 1, 1, 1], editor: { type: color } }
+        color5:      { value: [1, 1, 1, 1], editor: { type: color } }
+        height0:     { value: 0.0 }
+        height1:     { value: 0.0 }
+        height2:     { value: 0.0 }
+        height3:     { value: 0.0 }
+        height4:     { value: 0.0 }
+        height5:     { value: 0.0 }
+        layerNum:    { value: 4 , editor: { type: int } }
+        skewAngle:     { value: 0.0 }
+        sizeRatio:     { value: 4.34 }
+        waveType:     { value: 0.0 }
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+
+  out vec2 v_uv;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1);
+    pos = cc_matViewProj * pos;
+
+    v_uv = a_texCoord;
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+
+  #include <builtin/uniforms/cc-global>
+
+  in vec2 v_uv;
+
+  uniform sampler2D mainTexture;
+  uniform Constant {
+    vec4 mainColor;
+  };
+
+  #define M_PI 3.14159265358979323846
+  #define MAX_ARR_LEN 6
+
+  uniform Properties {
+    //颜色，最多6层
+    vec4 color0;
+    vec4 color1;
+    vec4 color2;
+    vec4 color3;
+    vec4 color4;
+    vec4 color5;
+
+    //每个颜色对应的高度
+    float height0;
+    float height1;
+    float height2;
+    float height3;
+    float height4;
+    float height5;
+    
+    float skewAngle;           //倾斜角度
+    float waveType;
+    
+    int layerNum;       //当前分为几层，最多为6
+    float sizeRatio;    //节点的高宽比
+  };
+
+  
+  //将一个点，以center为中心，旋转angle度
+  vec2 tranPt(vec2 uv,float angle,vec2 center){ 
+    float c = cos(angle);
+    float s = sin(angle);
+    float Ox = center.x;
+    float Oy = center.y;
+    mat3 m = mat3(
+          c,0.0-s,(1.0-c)*Ox+s*Oy,
+          s,c,(1.0-c)*Oy-s*Ox,
+          0.0,0.0,1.0
+    );
+    vec3 ret = m*vec3(uv.x,uv.y,0.0);
+    return ret.xy; 
+  }
+
+  //水面倾斜时，以哪个点为中心点
+  vec2 getCenter(float angle,float _height){
+    float ratio = sizeRatio;
+    bool toLeft = sin(angle)>=0.0;
+    vec2 center = vec2(0.5,1.0-_height);//水面倾斜时，以哪个点为中心点
+
+    float _t = abs(tan(angle));
+    if(_height<0.5){//水的体积小于杯子的一半,先碰到下瓶底
+      bool is_bottom = _t/ratio>2.0*_height;//倾斜角度达到瓶底
+      if(is_bottom){
+        center.x = sqrt(2.0*_height/_t*ratio)/2.0;
+        center.y = 1.0 - sqrt(2.0*_height*_t/ratio)/2.0;
+
+        bool is_top = _t>(ratio)/(_height*2.0);//倾斜角度达到瓶口
+        if(is_top){
+          center.y = 0.5;
+          center.x = _height;
+        }
+      }
+      if(!toLeft){
+        center.x = 1.0-center.x;
+      }
+    }else{//水比较多，先碰到上瓶底
+      bool is_top = _t>2.0*ratio*(1.0-_height);
+      if(is_top){
+        center.x = sqrt(2.0*ratio*(1.0-_height)/_t)/2.0;
+        center.y = sqrt(2.0*ratio*(1.0-_height)*_t)/2.0/ratio;
+
+        bool is_bottom = _t>ratio/(2.0*(1.0-_height));
+        if(is_bottom){
+          center.y = 0.5;
+          center.x = 1.0-_height;
+        }
+      }
+
+      if(toLeft){
+        center.x = 1.0-center.x;
+      }
+    }
+    return center;
+  }
+
+  //根据倾斜角度，模拟固定体积的水（假定杯子为长方形，有一定的误差）
+  //_height水占杯子的高度，从下往上算【0,1】
+  float drawWater(vec2 uv,float angle,float _height,int arrSize,int curIdx)
+  {
+    float ratio = sizeRatio;
+    bool toLeft = sin(angle)>=0.0;
+    vec2 center = getCenter(angle,_height);
+    
+    uv.y = uv.y*ratio;
+    uv -= vec2(center.x,center.y*ratio);
+    
+    vec2 uv1 = tranPt(uv,angle,vec2(0.0));
+    
+    float y = 0.0;
+
+    bool hasWave = curIdx==arrSize-1;//只有最上面一层有波浪
+    hasWave = hasWave;
+    if(hasWave){
+      // 代入正弦曲线公式计算模拟水面波浪 y = Asin(ωx ± φ)
+      float amplitude = 0.0;// 振幅（控制波浪顶端和底端的高度）
+      float angularVelocity = 0.0;// 角速度（控制波浪的周期）
+      float frequency = 0.0;// 频率（控制波浪移动的速度）
+      if(abs(waveType-1.0)<0.01){//往里倒水
+        amplitude = 0.06;
+        angularVelocity = 10.0;
+        frequency = 10.0;
+      }else if(abs(waveType-2.0)<0.01){//往外倒水
+        amplitude = 0.03;
+        angularVelocity = 5.0;
+        frequency = 6.0;
+      }
+      
+      y = amplitude * sin((angularVelocity * uv1.x) + (frequency * cc_time.x)*(toLeft ? 1. : -1.));
+    }
+        
+    //只绘制起点和终点之间
+    float alpha = (uv1.y > y) ? 1.0 : 0.0;
+
+    // 输出到屏幕
+    return alpha;
+  }
+
+  vec4 frag () {
+    // 保存顶点颜色
+    vec4 ret = vec4(1.0,1.0,1.0,1.0);
+
+    // 叠加纹理颜色
+    ret *= texture(mainTexture, v_uv);
+
+    // 直接丢弃原本就透明的像素
+    if(ret.a == 0.0){
+      discard;
+    }
+
+    float angle = skewAngle;
+
+    vec2 uv = vec2(v_uv);
+    float a = 0.0;
+    float _height = 0.0;
+
+    vec4 colors[6];
+    float heights[6]; 
+    colors[0] = color0; colors[1] = color1; colors[2] = color2; colors[3] = color3; colors[4] = color4; colors[5] = color5; 
+    heights[0] = height0; heights[1] = height1; heights[2] = height2; heights[3] = height3; heights[4] = height4; heights[5] = height5; 
+
+    int size = 0;
+    for(int i=0;i<MAX_ARR_LEN;i++){
+      if(heights[i]<0.001){
+        continue;
+      }
+      size++;
+    }
+    //从最下面一层开始绘制
+    for(int i=0;i<MAX_ARR_LEN;i++){ 
+      if(heights[i]<0.001){
+        continue;
+      }
+      _height+=heights[i];
+      a += drawWater(uv,angle,_height,size,i);
+      if(a>0.0){//绘制过的，跳过
+          ret *= a*colors[i]; 
+          break;
+      }
+    }
+    if(a<0.001){
+      discard;
+    }
+    return ret;
+  }
+
+  vec4 frag1 () {
+    if(v_uv.y<skewAngle){
+      discard;
+    }
+    vec4 col = mainColor*texture(mainTexture, v_uv);
+
+    return col;
+  }
+}% 
